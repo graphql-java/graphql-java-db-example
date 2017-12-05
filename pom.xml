@@ -1,0 +1,146 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <!--
+
+    This pom.xml only exists to help us generate the JooQ classes for the SQLLite chinook database example
+
+    In general you should not need to run this to get this code working since the output is checked in
+
+    But if you do then run
+
+        mvn clean process-resources
+
+
+    -->
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.graphql</groupId>
+    <artifactId>graphql-db-example</artifactId>
+    <version>1.0</version>
+    <dependencies>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+            <version>3.10.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq-meta</artifactId>
+            <version>3.10.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq-codegen-maven</artifactId>
+            <version>3.10.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq-codegen</artifactId>
+            <version>3.10.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.21.0</version>
+        </dependency>
+    </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jooq</groupId>
+                <artifactId>jooq-codegen-maven</artifactId>
+                <version>3.10.1</version>
+
+                <!-- The plugin should hook into the generate goal -->
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+
+                <dependencies>
+                    <dependency>
+                        <groupId>org.xerial</groupId>
+                        <artifactId>sqlite-jdbc</artifactId>
+                        <version>3.21.0</version>
+                    </dependency>
+                </dependencies>
+
+                <!-- Specify the plugin configuration.
+                     The configuration format is the same as for the standalone code generator -->
+                <configuration>
+
+                    <!-- Configure the database connection here -->
+                    <jdbc>
+                        <driver>org.sqlite.JDBC</driver>
+                        <url>jdbc:sqlite:src/main/resources/chinook.db</url>
+                        <user></user>
+                        <password></password>
+
+                        <!-- You can also pass user/password and other JDBC properties in the optional properties tag: -->
+                        <!--<properties>-->
+                        <!--<property><key>user</key><value>[db-user]</value></property>-->
+                        <!--<property><key>password</key><value>[db-password]</value></property>-->
+                        <!--</properties>-->
+                    </jdbc>
+
+                    <generator>
+                        <database>
+
+                            <name>org.jooq.util.sqlite.SQLiteDatabase</name>
+
+                            <!-- All elements that are generated from your schema (A Java regular expression.
+                                 Use the pipe to separate several expressions) Watch out for
+                                 case-sensitivity. Depending on your database, this might be
+                                 important!
+
+                                 You can create case-insensitive regular expressions using this syntax: (?i:expr)
+
+                                 Whitespace is ignored and comments are possible.
+                                 -->
+                            <includes>.*</includes>
+
+                            <!-- All elements that are excluded from your schema (A Java regular expression.
+                                 Use the pipe to separate several expressions). Excludes match before
+                                 includes, i.e. excludes have a higher priority -->
+                            <excludes>
+                                UNUSED_TABLE # This table (unqualified name) should not be generated
+                                | PREFIX_.* # Objects with a given prefix should not be generated
+                                | SECRET_SCHEMA\.SECRET_TABLE # This table (qualified name) should not be generated
+                                | SECRET_ROUTINE # This routine (unqualified name) ...
+                            </excludes>
+
+                            <!-- The schema that is used locally as a source for meta information.
+                                 This could be your development schema or the production schema, etc
+                                 This cannot be combined with the schemata element.
+
+                                 If left empty, jOOQ will generate all available schemata. See the
+                                 manual's next section to learn how to generate several schemata -->
+                            <inputSchema></inputSchema>
+                        </database>
+
+                        <generate>
+                            <!-- Generation flags: See advanced configuration properties -->
+                        </generate>
+
+                        <target>
+                            <!-- The destination package of your generated classes (within the
+                                 destination directory)
+
+                                 jOOQ may append the schema name to this package if generating multiple schemas,
+                                 e.g. org.jooq.your.packagename.schema1
+                                      org.jooq.your.packagename.schema2 -->
+                            <packageName>com.graphql.example.db.data</packageName>
+
+                            <!-- The destination directory of your generated classes -->
+                            <directory>
+                                src/main/java/
+                            </directory>
+                        </target>
+                    </generator>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
